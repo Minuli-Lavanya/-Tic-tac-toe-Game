@@ -9,7 +9,7 @@ app.use(cors());
 
 // Routes
 app.use("/auth", authRoutes);
-app.use("/games", gameRoutes);  // This will handle routes like GET /games
+app.use("/games", gameRoutes); 
 
-// Start server
+
 app.listen(3001, () => console.log("Server running on port 3001"));
