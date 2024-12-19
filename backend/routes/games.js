@@ -34,10 +34,10 @@ router.get("/:id", (req, res) => {
         let state = results[0].state;
         console.log("Fetched state:", state);
 
-        // Check if the state is a string and needs to be parsed
+        
         if (typeof state === 'string') {
             try {
-                state = JSON.parse(state);  // Parse the JSON if it's a string
+                state = JSON.parse(state); 
             } catch (jsonErr) {
                 console.error("Error parsing game state:", jsonErr);
                 return res.status(500).json({ message: "Invalid game state data" });
@@ -59,12 +59,11 @@ router.post("/:id/move", (req, res) => {
         if (results.length === 0) return res.status(404).json({ message: "Game not found" });
 
         let state = results[0].state;
-        console.log("Fetched state:", state); // Log the fetched state
+        console.log("Fetched state:", state); 
 
-        // Check the type of state to determine if it's already parsed
         if (typeof state === 'string') {
             try {
-                state = JSON.parse(state); // Parse the state if it's a string
+                state = JSON.parse(state);
             } catch (jsonErr) {
                 console.error("Error parsing game state:", jsonErr);
                 return res.status(500).json({ message: "Invalid game state data" });
@@ -74,11 +73,11 @@ router.post("/:id/move", (req, res) => {
             return res.status(500).json({ message: "Invalid game state data" });
         }
 
-        // Check if the cell is already occupied
+
         if (state[row][col] !== "") return res.status(400).json({ message: "Cell already occupied" });
 
         // Update the board with the move (X or O)
-        state[row][col] = "X"; // You can toggle between "X" and "O" depending on the player's turn
+        state[row][col] = "X"; 
 
         db.query("UPDATE games SET state = ? WHERE id = ?", [JSON.stringify(state), id], (err) => {
             if (err) return res.status(500).json(err);

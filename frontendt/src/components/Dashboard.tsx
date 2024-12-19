@@ -1,88 +1,111 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import GameBoard from "./GameBoard.tsx"; // Assuming this is the component to render the game
+import GameBoard from "./GameBoard.tsx";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const Dashboard: React.FC = () => {
-    const [games, setGames] = useState<any[]>([]);  // To store the list of games
-    const [loading, setLoading] = useState(true);  // To handle loading state
-    const [error, setError] = useState("");  // To handle error
-    const [gameId, setGameId] = useState<number | null>(null);  // To store the selected game ID
-    const token = localStorage.getItem("token");  // Retrieve the token from local storage
+    const [games, setGames] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [gameId, setGameId] = useState<number | null>(null);
+    const token = localStorage.getItem("token");
 
-    // Fetch games function
     const fetchGames = async () => {
         try {
             const response = await axios.get("http://localhost:3001/games", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setGames(response.data);  // Set the list of games
-            setLoading(false);  // Set loading to false once data is fetched
+            setGames(response.data);
+            setLoading(false);
         } catch (err) {
             setError("Failed to load games.");
-            setLoading(false);  // Stop loading if there's an error
+            setLoading(false);
         }
     };
 
-    // Fetch games when component is mounted or when token changes
     useEffect(() => {
         if (token) {
             fetchGames();
         }
     }, [token]);
 
-    // Function to create a new game
     const createGame = async () => {
         try {
             const response = await axios.post(
                 "http://localhost:3001/games",
-                {
-                    player1_id: 1,  // Example player1_id (you can use the user ID here)
-                    player2_id: 2,  // Example player2_id (you can use another user ID here)
-                },
+                { player1_id: 1, player2_id: 2 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setGameId(response.data.gameId);  // Set the ID of the newly created game
-            fetchGames();  // Fetch games again to update the list
+            setGameId(response.data.gameId);
+            fetchGames();
         } catch (err) {
             setError("Failed to create game.");
         }
     };
 
-    // Function to handle playing a game (set the selected game ID)
     const handlePlayGame = (id: number) => {
-        setGameId(id); // Set the selected game ID
+        setGameId(id);
     };
 
     if (loading) {
-        return <div>Loading or Create Game...</div>;  // Show loading message while fetching games
+        return (
+            <div className="d-flex justify-content-center align-items-center vh-100">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div>
-            <h2>Game Dashboard</h2>
-            {error && <p style={{ color: "red" }}>{error}</p>}
+        <div className="container mt-4">
+            <h2 className="text-center mb-4">Game Dashboard</h2>
+            {error && <div className="alert alert-danger">{error}</div>}
+
             {games.length === 0 ? (
-                <div>
+                <div className="text-center">
                     <p>No games available. Would you like to create a new game?</p>
-                    <button onClick={createGame}>Create Game</button>
+                    <button className="btn btn-primary" onClick={createGame}>
+                        Create Game
+                    </button>
                 </div>
             ) : (
                 <div>
-                    <h3>Available Games:</h3>
-                    {games.map((game) => (
-                        <div key={game.id}>
-                            <p>Game ID: {game.id}</p>
-                            <p>Player 1: {game.player1_id}</p>
-                            <p>Player 2: {game.player2_id}</p>
-                            <button onClick={() => handlePlayGame(game.id)}>Play Game</button>
-                        </div>
-                    ))}
+                    <h3 className="mb-3">Available Games</h3>
+                    <div className="row">
+                        {games.map((game) => (
+                            <div className="col-md-4 mb-4" key={game.id}>
+                                <div className="card shadow-lg" style={{ backgroundColor: "#001f3f", color: "white", borderRadius: "15px", border: "1px solidrgb(157, 178, 200)" }}>
+                                    <div className="card-body">
+                                        <h5 className="card-title text-light" style={{ fontSize: "1.5rem", fontWeight: "bold", textAlign:"center", color: "white"}}>Game ID: {game.id}</h5>
+                                        <p className="card-text text-light" style={{ fontSize: "1.1rem" }}>Player 1: {game.player1_id}</p>
+                                        <p className="card-text text-light" style={{ fontSize: "1.1rem" }}>Player 2: {game.player2_id}</p>
+                                        <button
+                                            className="btn btn-success btn-lg w-100"
+                                            onClick={() => handlePlayGame(game.id)}
+                                            style={{ backgroundColor: "#77b1d4", border: "none", fontWeight: "bold", transition: "background-color 0.3s ease" }}
+                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#57b9ff"}
+                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#77b1d4"}
+                                        >
+                                            Play Game
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
-            {gameId && <GameBoard gameId={gameId} token={token!} />}
+            {gameId && (
+                <div className="mt-4">
+                    <GameBoard gameId={gameId} token={token!} />
+                </div>
+            )}
         </div>
     );
 };
 
 export default Dashboard;
+
