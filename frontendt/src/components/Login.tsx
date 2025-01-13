@@ -1,38 +1,52 @@
-import React, { useState } from 'react';
-import { loginUser } from '../services/api.ts';
+import React, { useState } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
 
-const Login: React.FC<{ onLogin: (token: string, username: string) => void }> = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+interface Props {
+  setIsAuthenticated: (auth: boolean) => void;
+  setToken: (token: string) => void;
+  setPlayerName: (name: string) => void;
+}
 
-  const handleLogin = async () => {
+const Login: React.FC<Props> = ({ setIsAuthenticated, setToken, setPlayerName }) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const { data } = await loginUser(username, password);
-      onLogin(data.token, data.username);
-    } catch (err) {
-      setError('Invalid credentials');
+      const res = await axios.post("http://localhost:3000/login", {
+        username,
+        password,
+      });
+      setToken(res.data.token);
+      setPlayerName(username);
+      setIsAuthenticated(true);
+      Swal.fire("Success", "Logged in successfully!", "success");
+    } catch (error) {
+      Swal.fire("Error", "Invalid credentials!", "error");
     }
   };
 
   return (
-    <div>
+    <form onSubmit={handleLogin}>
       <h2>Login</h2>
       <input
         type="text"
         placeholder="Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+        required
       />
       <input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        required
       />
-      <button onClick={handleLogin}>Login</button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </div>
+      <button type="submit">Login</button>
+    </form>
   );
 };
 

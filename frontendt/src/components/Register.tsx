@@ -1,38 +1,43 @@
-import React, { useState } from 'react';
-import { registerUser} from '../services/api.ts';
+import React, { useState } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const Register: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleRegister = async () => {
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      await registerUser(username, password);
-      setMessage('Registration successful! You can now login.');
-    } catch (err) {
-      setMessage('Registration failed. Please try again.');
+      await axios.post("http://localhost:3000/register", {
+        username,
+        password,
+      });
+      Swal.fire("Success", "Registered successfully!", "success");
+    } catch (error) {
+      Swal.fire("Error", "Registration failed!", "error");
     }
   };
 
   return (
-    <div>
+    <form onSubmit={handleRegister}>
       <h2>Register</h2>
       <input
         type="text"
         placeholder="Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+        required
       />
       <input
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        required
       />
-      <button onClick={handleRegister}>Register</button>
-      {message && <p>{message}</p>}
-    </div>
+      <button type="submit">Register</button>
+    </form>
   );
 };
 
